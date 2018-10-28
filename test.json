@@ -1,0 +1,31 @@
+[
+  {
+    "intent": "How can I send a signal from a python program?",
+    "rewritten_intent": "send a signal `signal.SIGUSR1` to the current process",
+    "snippet": "os.kill(os.getpid(), signal.SIGUSR1)",
+    "question_id": 15080500
+  },
+  {
+    "intent": "Decode Hex String in Python 3",
+    "rewritten_intent": "decode a hex string '4a4b4c' to UTF-8.",
+    "snippet": "bytes.fromhex('4a4b4c').decode('utf-8')",
+    "question_id": 3283984
+  },
+  {
+    "intent": "check if all elements in a list are identical",
+    "rewritten_intent": "check if all elements in list `myList` are identical",
+    "snippet": "all(x == myList[0] for x in myList)",
+    "question_id": 3844801
+  },
+  {
+    "intent": "Format string dynamically",
+    "rewritten_intent": "format number of spaces between strings `Python`, `:` and `Very Good` to be `20`",
+    "snippet": "print('%*s : %*s' % (20, 'Pyth on', 20, 'Very Good'))",
+    "question_id": 4302166
+  },
+  {
+    "intent": "How to convert a string from CP-1251 to UTF-8?",
+    "rewritten_intent": null,
+    "snippet": "d.decode('cp1251').encode('utf8')",
+    "question_id": 7555335
+  },
