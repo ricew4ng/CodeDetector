@@ -1,5 +1,6 @@
 #coding:utf8
 
+import numpy
 import re
 
 # 输入一个dict，通过库中每行token
@@ -9,12 +10,21 @@ def trainDict(tokens,token_dict={},vector_length = 0):
 		if token not in token_dict.keys():
 			token_dict[token] = vector_length
 			vector_length+=1
-	
 	return token_dict,vector_length
 
+# 根据训练的token字典和相应的向量长度，将tokens转成一个vector
+def tokens2vector(tokens,token_dict,vector_length):
+	vector = numpy.zeros(vector_length)
+	vector = vector.astype(numpy.int16)
+	
+	for token in tokens:
+		if token in token_dict.keys():
+			vector[ token_dict[token] ] = 1
+	return vector
+	
 # 以各个间隔符分割一行代码，返回一个包含间隔符的token的list
 # 字符串和普通变量名应该各自用一个token表示，比如STRING，VAR
-def splitCode(code):
+def code2tokens(code):
 	split_list = ['.','\'','"',' ','[',']','(',')','{','}',':','=',',']
 	pat_string = '\'(.*?)\'|"(.*?)"|\'\'\'(.*?)\'\'\'' 
 	pat_var = '.*?='
@@ -53,7 +63,12 @@ def getCosine(vectorA,vectorB):
 		sumB+=pow(vectorB[i],2)
 	
 	value2 = pow(sumA,0.5) * pow(sumB,0.5)
-	return value1 / value2
+	
+	if value2 == 0:
+		r = 0
+	else:
+		r = value1 / value2
+	return r
 	
 # 从目标测试文件中读取每行代码，返回一个list（string）
 def getCodes(file_path):
@@ -65,3 +80,15 @@ def getCodes(file_path):
 	except Exception as e:
 		raise e
 	return r
+	
+# 从字典文件中读取字典，字典格式是 key \t value \n
+def getDict(dict_path):
+	try:
+		dict = {}
+		with open(dict_path,'r') as file:
+			for line in file:
+				kv = line.replace('\n','').split('\t')
+				dict[kv[0]] = int(kv[1])
+	except Exception as e:
+		raise e
+	return dict
