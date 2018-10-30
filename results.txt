@@ -1,0 +1,81 @@
+[*] Training vectors...
+[*] VectorsA ready !
+[*] Processing test codes...
+-------------
+[*] Result 1=>0.4472135954999579
+code=>os.kill(os.getpid(),signal.SIGUSRSERA_NUM)
+code_base=>root.mainloop()
+base_code_index => 24
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 2=>0.8017837257372731
+code=>bytes.fromhex("SERA_STRING").decode("SERA_STRING")
+code_base=>c.decode('unicode_escape')
+base_code_index => 2
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 3=>0.7171371656006361
+code=>SERA_VAR=SERA_VAR=myList[SERA_NUM]forxinmyList)
+code_base=>[x[1] for x in elements]
+base_code_index => 23
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 4=>0.5892556509887895
+code=>print("SERA_STRING"%(SERA_NUMSERA_NUM,"SERA_STRING",SERA_NUMSERA_NUM,"SERA_STRING"))
+code_base=>datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+base_code_index => 4
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 5=>0.8017837257372731
+code=>d.decode("SERA_STRING").encode("SERA_STRING")
+code_base=>c.decode('unicode_escape')
+base_code_index => 2
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 6=>0.42426406871192845
+code=>SERA_VAR={k:vfork,vinlist(kwargs.items())ifvisnotNone}
+code_base=>sum(len(v) for v in food_colors.values())
+base_code_index => 42
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 7=>0.4601789933084222
+code=>SERA_VAR=dict((k,v)fork,vinkwargs.items()ifvisnotNone)
+code_base=>sum(len(v) for v in food_colors.values())
+base_code_index => 42
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 8=>1.0
+code=>SERA_VAR=True)
+code_base=>list.sort(key=lambda item: item['date'], reverse=True)
+base_code_index => 29
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 9=>0
+code=>
+code_base=>list.sort(key=lambda item: item['date'], reverse=True)
+base_code_index => 29
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 10=>0.5443310539518174
+code=>pd.Series(list(set(sSERA_NUM).intersection(set(sSERA_NUM))))
+code_base=>pd.get_dummies(df)
+base_code_index => 17
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 11=>0.7142857142857142
+code=>client.send("SERA_STRING")
+code_base=>c.decode('unicode_escape')
+base_code_index => 2
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 12=>0.769800358919501
+code=>SERA_VAR=datetime.datetime.strptime(when,"SERA_STRING").date()
+code_base=>datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+base_code_index => 4
+sorted(l, key=lambda x: (-int(x[1]), x[0]))
+-------------
+[*] Result 13=>0.7142857142857142
+code=>inputString.split("SERA_STRING")
+code_base=>c.decode('unicode_escape')
+base_code_index => 2
+sorted(l, key=lambda x: (-int(x[1]), x[0]))

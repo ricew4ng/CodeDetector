@@ -22,6 +22,14 @@ def tokens2vector(tokens,token_dict,vector_length):
 			vector[ token_dict[token] ] = 1
 	return vector
 	
+# 根据向量转成tokens
+def vector2tokens(vector,token_vkdict):
+	tokens = []
+	for i in range(len(vector)):
+		if vector[i] == 1:
+			tokens.append(token_vkdict[i])
+	return tokens
+	
 # 以各个间隔符分割一行代码，返回一个包含间隔符的token的list
 # 字符串和普通变量名应该各自用一个token表示，比如STRING，VAR
 def code2tokens(code):
@@ -82,13 +90,16 @@ def getCodes(file_path):
 	return r
 	
 # 从字典文件中读取字典，字典格式是 key \t value \n
+# 返回两个dict，第一个是 key-value，第二个是value-key 因为两个字典都是唯一的
 def getDict(dict_path):
 	try:
 		dict = {}
+		dict2 = {}
 		with open(dict_path,'r') as file:
 			for line in file:
 				kv = line.replace('\n','').split('\t')
 				dict[kv[0]] = int(kv[1])
+				dict2[ int(kv[1]) ] = kv[0] 
 	except Exception as e:
 		raise e
-	return dict
+	return dict,dict2
