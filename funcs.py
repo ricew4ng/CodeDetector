@@ -1,94 +1,105 @@
 #coding:utf8
 
-import numpy
 import re
 
-# 输入一个dict，通过库中每行token
-# dict[token] = list中的位置
-def trainDict(tokens,token_dict={},vector_length = 0):
-	for token in tokens:
-		if token not in token_dict.keys():
-			token_dict[token] = vector_length
-			vector_length+=1
-	return token_dict,vector_length
-
-# 根据训练的token字典和相应的向量长度，将tokens转成一个vector
-def tokens2vector(tokens,token_dict,vector_length):
-	vector = numpy.zeros(vector_length)
-	vector = vector.astype(numpy.int16)
-	
-	for token in tokens:
-		if token in token_dict.keys():
-			vector[ token_dict[token] ] = 1
-	return vector
-	
-# 以各个间隔符分割一行代码，返回一个包含间隔符的token的list
 # 字符串和普通变量名应该各自用一个token表示，比如STRING，VAR
-def code2tokens(code):
-	split_list = ['.','\'','"',' ','[',']','(',')','{','}',':','=',',']
-	pat_string = '\'(.*?)\'|"(.*?)"|\'\'\'(.*?)\'\'\'' 
-	pat_var = '.*?='
-	pat_num = '[0-9]+?'
+def replaceCode(code):
+	# 先把变量名，字符串，数字替换成 ROVAR,ROSTRING,RONUM
+	pat_string = '\'(.+?)\'|"(.+?)"|\'\'\'(.+?)\'\'\'' 
+	pat_num = '[0-9]+'
+	pat_var1 = '[a-zA-Z_]+? *='
+	pat_var2 = '[a-zA-Z_]+? *,'
+	pat_var3 = '[a-zA-Z_]+? *\)'
+	code = re.compile(pat_string).sub('"ROSTRING"',code)
+	code = re.compile(pat_num).sub('RONUM',code)
+	code = re.compile(pat_var1).sub('ROVAR=',code)
+	code = re.compile(pat_var2).sub('ROVAR,',code)
+	code = re.compile(pat_var3).sub('ROVAR)',code)
+	return code
+			
+# 通过tokens，对dict进行更新,weight是（用行次数表示）权重值，用高优先级token匹配则权重应大一点
+def generateDict(tokens=[],text='',dict={},weight=1):
+	for token in tokens:
+		# r 是list，其中,r[x][0] 是序号+对应行代码；r[x][1]是行序号
+		try:
+			pat = '(([0-9]+?) .*?'+token+'.*?\n)'
+			r = re.compile(pat).findall(text)
+		except:
+			pat = '(([0-9]+?) .*?\\'+token+'.*?\n)'
+			r = re.compile(pat).findall(text)
+		for k in r:
+			if k[1] in dict.keys():
+				dict[k[1]][1]+=weight
+			else:
+				# 初始化dict的键为某行数的值，为一个list，list[0]是爬到的文本,list[1]是行出现次数
+				dict[k[1]] = [k[0],1] 
+	return dict
 	
+# 暂时通过文件读取（后面改成数据库
+def getTextByNum(tokens,num_list):
+	pass
+	
+# 输入tokens列表，返回按照优先级划分的2个list
+def splitTokensByPRI(tokens):
+	h_PRI = ['.','(','['] # 这些字符前的词权重应该是最高的
+	low_list = ['.','\'','"',' ','[',']','(',')','{','}',':','=',',','+','-','>','<','RONUM','ROSTRING','ROVAR','%']
+	alpha_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+	
+	h_tokens = [] # 高优先级 tokens
+	l_tokens = [] # 低优先级 tokens
+	
+	for i,token in enumerate(tokens):
+		# 如果当前token是 .([中的一个，则前一个token优先级很高
+		if token in h_PRI and i != 0: 
+			if tokens[i-1] not in low_list and tokens[i-1] not in alpha_list:
+				h_tokens.append(tokens[i-1])
+		else:
+			l_tokens.append(token)
+	
+	return h_tokens,l_tokens
+	
+# 分割库中代码用，以各个间隔符分割一行代码，返回一个包含间隔符的token的list
+def code2tokens(code):
 	tokens = []
 	
-	# 将字符串替换为 "STRING"，将变量替换为 SERA_VAR=
-	code = re.compile(pat_string).sub('"SERA_STRING"',code) 
-	code = re.compile(pat_var).sub('SERA_VAR=',code)
-	code = re.compile(pat_num).sub('SERA_NUM',code)
-	
+	split_list = ['.','\'','"',' ','[',']','(',')','{','}',':','=',',','+','-','>','<']
 	word = ''
 	for i in code:
-		if i in split_list:
+		if i not in split_list:
+			word+=i
+		else:
 			if word != '':
 				tokens.append(word)
 				word = ''
 			if i != ' ':
 				tokens.append(i)
-		else:
-			word+=i
+			
 	return tokens
 			
-# 输入两个向量(list)，应用余弦定理求出其余弦值
-# 公式: cos值 = <vectorA,vectorB> / ( |vectorA|*|vectorB| )
-# 即: cos值 = ( x1y1+x2y2+...+xNyN ) / sqrt(x1*x1+x2*x2+...+xN*xN) * sqrt(y1*y1+y2*y2+...+yN*yN)
-def getCosine(vectorA,vectorB):
-	value1 = 0
-	sumA = 0
-	sumB = 0
-	
-	for i in range(len(vectorA)):
-		value1+=(vectorA[i]*vectorB[i])
-		sumA+=pow(vectorA[i],2)
-		sumB+=pow(vectorB[i],2)
-	
-	value2 = pow(sumA,0.5) * pow(sumB,0.5)
-	
-	if value2 == 0:
-		r = 0
-	else:
-		r = value1 / value2
-	return r
-	
+# 输入codes，（原始无序号，每行为一行代码）
+# 输出一份对应的带行号，且每行都是高优先级token 的文本
+def generateTokensByPRI(codes,fileName='data/high_tokens_id'):
+	with open(fileName,'w') as file:
+		for i,code in enumerate(codes):
+			code = replaceCode(code)
+			tokens = code2tokens(code)
+			h_tokens,l_tokens = splitTokensByPRI(tokens)
+			
+			file.write( str(i)+' '+' '.join(h_tokens)+'\n' )
+			
 # 从目标测试文件中读取每行代码，返回一个list（string）
-def getCodes(file_path):
+def getCodes(file_path,isJson=False):
 	try:
-		pat = '"snippet": "(.*?)"'
-		with open(file_path,'r') as file:
-			text = file.read()
-		r = re.compile(pat).findall(text)
+		if isJson:
+			pat = '"snippet": "(.*?)",'
+			with open(file_path,'r') as file:
+				text = file.read()
+			codes = re.compile(pat).findall(text)
+		else:
+			codes = []
+			with open(file_path,'r') as file:
+				for line in file:
+					codes.append(line[:-1])
 	except Exception as e:
 		raise e
-	return r
-	
-# 从字典文件中读取字典，字典格式是 key \t value \n
-def getDict(dict_path):
-	try:
-		dict = {}
-		with open(dict_path,'r') as file:
-			for line in file:
-				kv = line.replace('\n','').split('\t')
-				dict[kv[0]] = int(kv[1])
-	except Exception as e:
-		raise e
-	return dict
+	return codes

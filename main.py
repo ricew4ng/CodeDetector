@@ -2,82 +2,48 @@
 
 from funcs import *
 
-# 最终目的是将库中每行代码对应一个向量，即生成一个向量矩阵存入文件中，还有一个dict
-# 同时，测试代码要比较相似度的话，初始化一个全零list，需要通过一个dict，来给list相应位置1
-
-# 如果要训练的话，就是看dict中是否有未知token，然后添加入dict中，并给list置1
-
-# 总结一下 语法树，一般来说
-# 等号左边都是给某个变量赋值，所以可以把等号左边的变量都替换为某个定值
-
 if __name__ == '__main__':
-	token_dict = getDict('data/output_dict') # 载入字典
-	
-	vector_length = 75162
-	
-	codes = getCodes('data/conala-train.json') # 载入raw代码
-	
-	print('[*] Training vectors...')
-	
-	vectorsA = [] # 初始化库中的vector数组
-	
-	
-	count = 0 
-	for code in codes:
-		tokens = code2tokens(code) # 将代码转成token数组
-		vector = tokens2vector(tokens,token_dict,vector_length)
+	# 生成高优先级tokens 文本 high_tokens_id
+	# codes = getCodes('data/codes_train')
+	# generateTokensByPRI(codes)
 		
-		vectorsA.append(vector)
-		count+=1
-		if count == 50:
-			break
+	# 载入高优先级库文本
+	with open('data/high_tokens_id','r') as file:
+		high_tokens_text = file.read()
 		
+	codes_train = []
+	with open('data/codes_train','r') as file:
+		for line in file:
+			codes_train.append(line[:-1])
+			
+	# 输入待检测代码
+	code = 'urllib.parse.unquote(\'Foo%E2%84%A2%20Bar\').decode(\'utf-8\')'
+	
+	tokens = code2tokens(code)
+	
+	h_tokens,l_tokens = splitTokensByPRI(tokens)
+	
+	dict = generateDict(h_tokens,text=high_tokens_text,weight=50)
+	
+	filt_text = ''
+	
+	for line_num in dict.keys():
+		filt_text+=codes_train[int(line_num)]+'\n'
 		
-	print('[*] VectorsA ready !')
+	dict = generateDict(l_tokens,text=filt_text,weight=0.1)
 	
-	print('[*] Processing test codes...')
+	max_kvs = [] # 二维list
+	for i in range(10):
+		kv = [-1,0]
+		max_kvs.append(kv)
 	
-	codes = getCodes('data/conala-test.json') # 载入测试代码
+	for key,value in dict.items():
+		for i in range(len(max_kvs)):
+			if value[1] > max_kvs[i][1]:
+				max_kvs.insert(i,[key,value[1]])
+				max_kvs.pop(10)
+				break
 	
-	
-	count = 0 # 测试3行代码
-	
-	for code in codes:
-		tokens = code2tokens(code)
-		vectorB = tokens2vector(tokens,token_dict,vector_length) #获取待测试代码的向量
-		
-		max_sim = 0
-		
-		# 遍历 vectorsA ，与vectorB做比较
-		for vectorA in vectorsA:
-			r = getCosine(vectorA,vectorB)
-			if max_sim < r:
-				max_sim = r
-					
-					
-		print('[*] Result '+str(count+1)+'=>' +str(max_sim)+'\tcode=>'+' '.join(tokens))
-		
-		count+=1 
-		if count == 20:
-			break
-	
-	
-	# x = map(lambda i:str(i) ,x )
-	
-	# with open('test','w') as file:
-		# file.write( ','.join(x)+'\n' )
-		
-		
-	'''# 训练token字典，比较耗时，几十秒左右
-	codes = getCodes('./data/conala-train.json')
-	
-	vector_length = 0
-	
-	for code in codes:
-		tokens = code2tokens(code) # 获得此tokens
-		token_dict,vector_length = trainDict(tokens,token_dict,vector_length)
-	
-	with open('output_dict','w') as file:
-		for k,v in token_dict.items():
-			file.write(k+'\t'+str(v)+'\n')
-	'''
+	print('[*] \tbase code=>'+code)
+	for i in max_kvs:
+		print( i[0]+' '+str(i[1])+'\tcode=>'+codes_train[int(i[0])] )
