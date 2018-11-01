@@ -26,7 +26,6 @@ if __name__ == '__main__':
 	dict = generateDict(h_tokens,text=high_tokens_text,weight=50)
 	
 	filt_text = ''
-	
 	for line_num in dict.keys():
 		filt_text+=codes_train[int(line_num)]+'\n'
 		
