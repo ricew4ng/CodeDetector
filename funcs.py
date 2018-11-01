@@ -32,7 +32,7 @@ def generateDict(tokens=[],text='',dict={},weight=1):
 				dict[k[1]][1]+=weight
 			else:
 				# 初始化dict的键为某行数的值，为一个list，list[0]是爬到的文本,list[1]是行出现次数
-				dict[k[1]] = [k[0],1] 
+				dict[k[1]] = [k[0],1]
 	return dict
 	
 # 暂时通过文件读取（后面改成数据库
