@@ -38,4 +38,6 @@
 2. 更加准确的提取有意义的token
 
 对于1，就考虑在提取一行代码的时候，在token的最后添加上一个数字表示token的顺序
+
+对于2，主要修改code2tokens和splitTokensByPRI函数
 '''
