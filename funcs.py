@@ -2,57 +2,33 @@
 
 import re
 
-def test(raw_code,TEST=False):
-	if TEST:
-		codes_path = 'data/codes_test_id'
-		hp_tokens_text_path = 'data/hp_tokens_id_test'
-	else:
-		codes_path = 'data/codes_train_id'
-		hp_tokens_text_path = 'data/hp_tokens_id_train'
-	
-	
+def test(raw_code,db_codes=None,hp_tokens_text=None,TEST=False):
 	code = replaceCode(raw_code) # 泛化代码
-	
 	tokens = code2tokens(code) # 提取tokens
-	
-	# 按优先级和顺序获取tokens
-	hp_tokens,lp_tokens = splitTokensByPRI(tokens)
-	
+	hp_tokens,lp_tokens = splitTokensByPRI(tokens) # 按优先级和顺序获取tokens
 		
-	# 载入高优先级库文本
-	with open(hp_tokens_text_path,'r') as file:
-		hp_tokens_text = file.read()
-		
-	test_dict = generateDict(hp_tokens,text=hp_tokens_text,weight=50)
-	
-	codes = []
-	with open(codes_path,'r') as file:
-		for line in file:
-			codes.append(line[:-1])
+	hp_dict = generateDict(hp_tokens,text=hp_tokens_text,weight=50)
 	
 	# 获取 通过了高优先筛选的文本
 	filt_text = ''
-	for line_num in test_dict.keys():
-		filt_text+=codes[int(line_num)]+'\n'
+	for line_num in hp_dict.keys():
+		filt_text+=db_codes[int(line_num)]+'\n'
 		
-	test_dict = generateDict(tokens,dict=test_dict,text=filt_text,weight=1)
+	normal_dict = generateDict(tokens,dict=hp_dict,text=filt_text,weight=1)
 	
 	max_kvs = [] # 二维list
 	for i in range(10):
 		kv = [-1,0]
 		max_kvs.append(kv)
 	
-	for key,value in test_dict.items():
+	for key,value in normal_dict.items():
 		for i in range(len(max_kvs)):
 			if value[1] > max_kvs[i][1]:
 				max_kvs.insert(i,[key,value[1]])
 				max_kvs.pop(10)
 				break
 	
-	print('[*]\tbase code=>'+raw_code)
-	for i in max_kvs:
-		if i[0] != -1:
-			print( i[0]+'\tWeight:'+str(i[1])+'\tcode=>'+codes[int(i[0])] )
+	return max_kvs[0]
 
 # 字符串和普通变量名应该各自用一个token表示，比如STRING，VAR
 def replaceCode(code):
@@ -71,7 +47,9 @@ def replaceCode(code):
 	return code
 	
 # 通过tokens，对dict进行更新,weight是（用行次数表示）权重值，token越高优先，权重越大
-def generateDict(tokens=[],text='',dict={},weight=1):
+def generateDict(tokens=[],text='',dict=None,weight=1):
+	if dict == None:
+		dict = {}
 	# 正则匹配到的是 比如: 1203 print('Hello World')换行符 这样的一串文本内容和其行号数字
 	pat_start = '(([0-9]+?) .*?'
 	pat_end = '.*?\n)'
@@ -132,6 +110,46 @@ def splitTokensByPRI(tokens,addNum=False):
 		lp_tokens.append( token ) # 将最后一项加入lp_tokens
 	
 	return hp_tokens,lp_tokens
+	
+# 获取两段code的相似度
+# 泛化-转tokens- 计算 相似的token数 / 较长code的总token数
+def getSimilarity(codeA,codeB):
+	codeA = replaceCode(codeA)
+	codeB = replaceCode(codeB)
+	
+	tokensA = code2tokens(codeA)
+	tokensB = code2tokens(codeB)
+	
+	index_list = [] # 索引list
+	
+	# 求最长的相似token数（还要考虑顺序）
+	
+	# 第一步先按照tokensA的顺序求出所有在B中的token
+	for token in tokensA: #遍历tokensA
+		if token in tokensB:
+			token_index = tokensB.index(token)
+			index_list.append( token_index )
+			tokensB[token_index] = '' # 将此处token置为空字符串，因为code2tokens不含''
+	
+	# 接下来求取index_list中递增且最长的一个离散序列的长度
+	max = 0
+	
+	for i,index in enumerate(index_list):
+		temp_max = 0
+		for j in range( i+1, len(index_list) ):
+			if index_list[j] > index:
+				temp_max+=1
+				index = index_list[j]
+		if temp_max > max:
+			max = temp_max
+	
+	try:
+		tokens_num = len(tokensA)-1 if len(tokensA) > len(tokensB) else len(tokensB)-1
+		r = max / tokens_num
+	except Exception as e:
+		r = 0
+		print('[*] Data Error')
+	return r
 	
 # 分割库中代码用，以各个间隔符分割一行代码，返回一个包含间隔符的token的list
 def code2tokens(code):
