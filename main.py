@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	else:
 		db_codes_path = 'data/codes_train_id'
 		hp_tokens_text_path = 'data/hp_tokens_id_train'
-		
+	
 	# 载入库代码
 	db_codes = []
 	with open(db_codes_path,'r') as file:
@@ -30,7 +30,14 @@ if __name__ == '__main__':
 	with open(hp_tokens_text_path,'r') as file:
 		hp_tokens_text = file.read()
 		
-		
+	
+	code = 'matplotlib.rc(\'font\', **{\'sans-serif\': \'Arial\', \'family\': \'sans-serif\'})'
+	code = 'matplotlib.rc(\'font\', **{\'sans-serif\': \'Arial\', \'family\': \'sans-serif\'})'
+	index,weight = test(code,db_codes,hp_tokens_text,TEST)
+	
+	print(db_codes[int(index)] )
+	print(code)
+	'''
 	pat = '([0-9]+?) (.*)' # 提取正则式
 	# 测试代码
 	with open('./data/conala-test.json', 'r') as code_f:
@@ -53,3 +60,4 @@ if __name__ == '__main__':
 			
 			if i == 10: # 测试十条数据
 				break
+	'''

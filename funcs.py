@@ -56,7 +56,7 @@ def generateDict(tokens=[],text='',dict=None,weight=1):
 	pat_token = '([^0-9]*?)[0-9]*$'
 	
 	for token in tokens:
-		token = re.compile(pat_token).findall(token)
+		token = re.compile(pat_token).findall(token) # 提取非权重token
 		token = ''.join(token)
 		
 		if token in ['.','*','(',')','?','+','\\','[',']','{','}']:
@@ -84,7 +84,7 @@ def getTextByNum(tokens,num_list):
 # 输入tokens列表，返回按照优先级划分的2个list
 def splitTokensByPRI(tokens,addNum=False):
 	high_pri = ['.','(','['] # 这些字符前的词权重应该是最高的
-	low_list = ['.','\'','"',' ','[',']','(',')','{','}',':','=',',','+','-','>','<','RONUM','ROSTRING','ROVAR','%']
+	low_list = ['.','\'','"',' ','[',']','(',')','{','}','*','?',':','=',',','+','-','>','<','RONUM','ROSTRING','ROVAR','%']
 	alpha_list = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 	
 	hp_tokens = [] # 高优先级 tokens
@@ -155,7 +155,7 @@ def getSimilarity(codeA,codeB):
 def code2tokens(code):
 	tokens = []
 	
-	split_list = ['.','\'','"',' ','[',']','(',')','{','}',':','=',',','+','-','>','<']
+	split_list = ['.','\'','"',' ','?','*','[',']','(',')','{','}',':','=',',','+','-','>','<']
 	word = ''
 	for i in code:
 		if i not in split_list:
