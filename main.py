@@ -32,9 +32,9 @@ if __name__ == '__main__':
 		
 	
 	code = 'matplotlib.rc(\'font\', **{\'sans-serif\': \'Arial\', \'family\': \'sans-serif\'})'
-	code = 'matplotlib.rc(\'font\', **{\'sans-serif\': \'Arial\', \'family\': \'sans-serif\'})'
+	code = 're.findall(\'\"(http.*?)\"\', s, re.MULTILINE | re.DOTALL)'
 	index,weight = test(code,db_codes,hp_tokens_text,TEST)
-	
+	print(index,weight)
 	print(db_codes[int(index)] )
 	print(code)
 	'''

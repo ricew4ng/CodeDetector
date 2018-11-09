@@ -5,9 +5,9 @@ from funcs import *
 
 
 codeA = 'all(x == myList[0] for x in myList)'
-codeB = 'all(x == mylist[0] for x in mylist)'
+codeB = 're.findall(\'\"(http.*?)\"\', s, re.MULTILINE | re.DOTALL)'
 
-print( getSimilarity(codeA,codeB) )
+print( code2tokens(codeB) )
 
 
 # str = '''4923 print(' '.join(get_words(['k', 'c', 't', 'a'])))'''

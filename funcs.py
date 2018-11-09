@@ -47,7 +47,7 @@ def replaceCode(code):
 	return code
 	
 # 通过tokens，对dict进行更新,weight是（用行次数表示）权重值，token越高优先，权重越大
-def generateDict(tokens=[],text='',dict=None,weight=1):
+def generateDict(tokens,text='',dict=None,weight=1):
 	if dict == None:
 		dict = {}
 	# 正则匹配到的是 比如: 1203 print('Hello World')换行符 这样的一串文本内容和其行号数字
@@ -59,12 +59,20 @@ def generateDict(tokens=[],text='',dict=None,weight=1):
 		token = re.compile(pat_token).findall(token) # 提取非权重token
 		token = ''.join(token)
 		
-		if token in ['.','*','(',')','?','+','\\','[',']','{','}']:
+		if token in ['.','*','(',')','?','+','\\','[',']','{','}','|',',']:
 			token = '\\'+token
+		
+		try:
+			tmp_pat = token+'.*?'
+			pat = pat_start+tmp_pat+pat_end
+			compiled_pat = re.compile(pat)
+		except:
+			tmp_pat = '\\'+token+'.*?'
+			pat = pat_start+tmp_pat+pat_end
+			compiled_pat = re.compile(pat)
 			
-		tmp_pat = token+'.*?'
-		pat = pat_start+tmp_pat+pat_end
-		r = re.compile(pat).findall(text)
+		r = compiled_pat.findall(text)
+		
 		if len(r):
 			pat_start+=tmp_pat
 		
